@@ -10,13 +10,14 @@ class MapsView extends GetView<MapsController> {
           mapType: MapType.normal,
           initialCameraPosition: CameraPosition(
             target: controller.initialPositionMap,
-            zoom: 2,
+            zoom: 12,
           ),
           zoomControlsEnabled: true,
           markers: controller.markers,
           myLocationEnabled: true,
           myLocationButtonEnabled: true,
           buildingsEnabled: false,
+          circles: controller.circle,
         )));
   }
 }

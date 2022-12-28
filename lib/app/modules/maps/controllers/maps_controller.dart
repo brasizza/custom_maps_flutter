@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:custommarker/app/data/model/location_model.dart';
@@ -8,14 +7,17 @@ import 'package:custommarker/app/data/model/map_type.dart';
 import 'package:custommarker/app/modules/maps/views/components/location_destription.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class MapsController extends GetxController with StateMixin<List<LocationModel>> {
   final repository;
   Rx<Set<Marker>> _markers = Rx<Set<Marker>>({});
+  Rx<Set<Circle>> _circles = Rx<Set<Circle>>({});
+
   Set<Marker> get markers => this._markers.value.toSet();
+  Set<Circle> get circle => this._circles.value.toSet();
 
   final _googleMapController = Completer().obs;
   Completer get googleMaps => this._googleMapController.value;
@@ -35,6 +37,7 @@ class MapsController extends GetxController with StateMixin<List<LocationModel>>
     change(null, status: RxStatus.loading());
     this.repository.getData().then((List<LocationModel> locations) {
       _generateMarkers(type, locations);
+      _generateCircles(locations);
       change(locations, status: RxStatus.success());
     }, onError: (err) {
       print(err);
@@ -48,7 +51,8 @@ class MapsController extends GetxController with StateMixin<List<LocationModel>>
   Future<void> _generateMarkers(MyMapTyes type, List<LocationModel> locations) async {
     _markers.value.clear();
     _markers.refresh();
-
+    _circles.value.clear();
+    _circles.refresh();
     await Future.forEach(locations, (LocationModel location) async {
       Marker _mark = await _generateMarker(type, location);
       _markers.value.add(_mark);
@@ -109,5 +113,21 @@ class MapsController extends GetxController with StateMixin<List<LocationModel>>
 
   void setInitialPosition(double lat, double lng) {
     _initialPositionMap.value = LatLng(lat, lng);
+  }
+
+  void _generateCircles(List<LocationModel> locations) {
+    for (var location in locations) {
+      _circles.value.add(
+        Circle(
+          circleId: CircleId(location.hashCode.toString()),
+          center: LatLng(location.lat ?? 0.0, location.lng ?? 0.0),
+          radius: 1000,
+          fillColor: Colors.blue.shade300.withOpacity(.5),
+          strokeWidth: 0,
+        ),
+      );
+    }
+
+    _circles.refresh();
   }
 }

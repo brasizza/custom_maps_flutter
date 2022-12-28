@@ -1,7 +1,5 @@
-import 'package:custommarker/app/data/model/map_type.dart';
 import 'package:custommarker/app/modules/maps/views/maps_view.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 
 import '../controllers/home_controller.dart';
